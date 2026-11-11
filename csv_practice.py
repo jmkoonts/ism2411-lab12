@@ -2,6 +2,11 @@
 #Author: Jacob Koonts
 #Module 12 Lab: Read a Sales CSV, Write a Cleaned Report
 
+#1. Python automates file processing and can scale it seamlessly with big datasets which would crash Excel. While Excel has better visual formatting,
+#   Python is better at reproducible data and automating scripts where Excel is better for quick manual edits, charts, and interactive tables
+#2. An online transaction would have benefits from logging. Append mode is the right tool because it will add the new entries to the end of the file without
+#   overlapping the provious entries, this is helpful because everything can be traced back.
+
 import csv
 from datetime import datetime
 
@@ -67,18 +72,45 @@ with open(CLEANED_FILE, "w", newline="") as f:
         writer.writerow(row)
 
 
-
 print("--- Exercise 6 ---")
 
 dict_total = 0
 with open(SALES_FILE, "r") as f:
     reader = csv.DictReader(f)
     for row in reader:
-        price = float(row["Price"])
-        quantity = int(row["Quantity"])
+        price = float(row["price"])
+        quantity = int(row["quantity"])
         total = price * quantity
         dict_total += total
-        print(f"{row['Product']}: {quantity} units x ${price:.2f} = ${total:.2f}")
+        print(f"{row['product']}: {quantity} units x ${price:.2f} = ${total:.2f}")
 
 print(f"Total Revenue: ${dict_total:.2f}")
 
+#I would use csv.reader for simple files and use csv.DictReader for better readability and it adds safety if column positions change
+
+print("--- Exercise 7 ---")
+summary = {}
+
+with open(SALES_FILE, "r") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        product = row["product"]
+        total = float(row["price"]) * int(row["quantity"])
+        summary[product] = summary.get(product, 0) + total
+
+for product in sorted(summary):
+    print(f"{product}: ${summary[product]:.2f}")
+
+print("--- Exercise 8 ---")
+
+timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+with open(LOG_FILE, "a") as f:
+    f.write(f"{timestamp} total revenue: ${total_revenue:.2f}\n")
+
+entries = 0
+with open(LOG_FILE, "r") as f:
+    for line in f:
+        entries += 1
+        print(line.strip())
+
+print(f"Logged Entries: {entries}")
